@@ -30,12 +30,7 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
-      # Configuración de pnpm y Node.js
-      - name: Instalar pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
+      # Configuración de Node.js
       - name: Configurar Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -60,11 +55,11 @@ jobs:
       # ---------------------------------------------------------------------
       - name: Instalar dependencias del Frontend
         working-directory: ./helpdesk-frontend
-        run: pnpm install --no-frozen-lockfile
+        run: npm install
 
       - name: Compilar Frontend con Astro (Build check)
         working-directory: ./helpdesk-frontend
-        run: pnpm run build
+        run: npm run build
 
  
   # ETAPA 2: ENTREGA CONTINUA (Docker Build & Push a GHCR)
