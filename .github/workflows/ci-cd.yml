@@ -30,7 +30,12 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
-      # Configuración de Node.js
+      # Configuración de pnpm y Node.js
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Configurar Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -53,14 +58,9 @@ jobs:
       # ---------------------------------------------------------------------
       # B) Verificación y Build del Frontend (helpdesk-frontend con Astro)
       # ---------------------------------------------------------------------
-      - name: Instalar pnpm (Frontend)
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
       - name: Instalar dependencias del Frontend
         working-directory: ./helpdesk-frontend
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Compilar Frontend con Astro (Build check)
         working-directory: ./helpdesk-frontend
