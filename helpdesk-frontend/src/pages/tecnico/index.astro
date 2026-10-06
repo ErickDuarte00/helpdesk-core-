@@ -1,0 +1,370 @@
+---
+/**
+ * ARCHIVO: src/pages/tecnico/index.astro
+ * DESCRIPCIÓN: Panel principal de control y gestión de incidencias para el Técnico de TI.
+ * Permite monitorear indicadores operativos, filtrar por asignación (mis tickets, sin asignar, todos),
+ * aplicar filtros combinados en tiempo real y acceder a la atención técnica de cada ticket.
+ */
+
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Panel Técnico | Helpdesk">
+  <!-- Encabezado unificado: Logotipo y credenciales en esquina superior derecha -->
+  <header
+    class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center"
+  >
+    <div class="text-xl font-black tracking-wider text-white">
+      HELPDESK <span class="text-blue-500">IT</span>
+    </div>
+
+    <!-- Contenedor de usuario activo, etiqueta de rol y botón de desconexión -->
+    <div class="flex items-center gap-3">
+      <span id="user-name" class="text-sm font-semibold text-white"></span>
+      <span
+        id="user-role"
+        class="text-xs px-2.5 py-0.5 rounded-full font-mono uppercase font-bold tracking-wide bg-blue-900/50 text-blue-300 border border-blue-700/60"
+      ></span>
+      <button
+        id="btn-logout"
+        class="px-3 py-1.5 border border-slate-600 hover:bg-slate-700 text-slate-300 rounded text-sm transition ml-2"
+      >
+        Cerrar Sesión
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <!-- Grid de Métricas de Soporte -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div
+        class="bg-slate-800 p-5 rounded-xl border border-blue-500/30 shadow-sm"
+      >
+        <p class="text-sm text-blue-400 font-medium">Asignados a Mí</p>
+        <p
+          id="metric-mis-asignados"
+          class="text-3xl font-extrabold text-white mt-1"
+        >
+          0
+        </p>
+      </div>
+      <div
+        class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm"
+      >
+        <p class="text-sm text-slate-400 font-medium">Abiertos Globales</p>
+        <p
+          id="metric-abiertos"
+          class="text-3xl font-extrabold text-amber-400 mt-1"
+        >
+          0
+        </p>
+      </div>
+      <div
+        class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm"
+      >
+        <p class="text-sm text-slate-400 font-medium">En Progreso Global</p>
+        <p
+          id="metric-progreso"
+          class="text-3xl font-extrabold text-blue-400 mt-1"
+        >
+          0
+        </p>
+      </div>
+      <div
+        class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm"
+      >
+        <p class="text-sm text-slate-400 font-medium">Resueltos Hoy</p>
+        <p
+          id="metric-resueltos"
+          class="text-3xl font-extrabold text-emerald-400 mt-1"
+        >
+          0
+        </p>
+      </div>
+    </div>
+
+    <!-- Pestañas de asignación rápida -->
+    <div class="flex gap-2 mb-4 border-b border-slate-700 pb-2">
+      <button
+        id="tab-assigned"
+        class="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition"
+      >
+        Mis tickets asignados
+      </button>
+      <button
+        id="tab-unassigned"
+        class="px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
+      >
+        Sin asignar
+      </button>
+      <button
+        id="tab-all"
+        class="px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
+      >
+        Todos los tickets
+      </button>
+    </div>
+
+    <!-- Controles de filtrado y búsqueda combinada -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+      <input
+        type="text"
+        id="filter-search"
+        placeholder="Buscar por código o título..."
+        class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+      />
+      <select
+        id="filter-status"
+        class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+      >
+        <option value="Todos">Estado: Todos</option>
+        <option value="Abierto">Abierto</option>
+        <option value="Asignado">Asignado</option>
+        <option value="En progreso">En progreso</option>
+        <option value="Resuelto">Resuelto</option>
+        <option value="Cerrado">Cerrado</option>
+      </select>
+      <select
+        id="filter-priority"
+        class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+      >
+        <option value="Todas">Prioridad: Todas</option>
+        <option value="Baja">Baja</option>
+        <option value="Media">Media</option>
+        <option value="Alta">Alta</option>
+        <option value="Crítica">Crítica</option>
+      </select>
+      <select
+        id="filter-category"
+        class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+      >
+        <option value="Todas">Categoría: Todas</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Software">Software</option>
+        <option value="Red">Red</option>
+        <option value="Accesos">Accesos</option>
+        <option value="Servidores">Servidores</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+
+    <!-- Tabla principal de incidencias -->
+    <div
+      class="bg-slate-800 border border-slate-700 rounded-xl overflow-x-auto shadow"
+    >
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-slate-700 bg-slate-850 text-slate-400">
+            <th class="p-3.5">Código</th>
+            <th class="p-3.5">Incidencia</th>
+            <th class="p-3.5">Categoría</th>
+            <th class="p-3.5">Prioridad</th>
+            <th class="p-3.5">Estado</th>
+            <th class="p-3.5">Solicitante</th>
+            <th class="p-3.5">Técnico Asignado</th>
+            <th class="p-3.5 text-right">Acción</th>
+          </tr>
+        </thead>
+        <tbody
+          id="tickets-table-body"
+          class="divide-y divide-slate-700 text-slate-200"
+        >
+          <!-- Las filas se renderizan dinámicamente vía JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const API_URL = "http://127.0.0.1:3000/api";
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // Validación de autenticación
+  if (!token || !user.id) {
+    window.location.href = "/";
+  }
+
+  // Validación de permisos por rol (técnico o admin)
+  const userRole = String(user.role || "")
+    .toLowerCase()
+    .trim();
+  if (
+    userRole !== "tecnico" &&
+    userRole !== "admin" &&
+    userRole !== "administrador"
+  ) {
+    window.location.href = userRole === "empleado" ? "/empleado" : "/";
+  }
+
+  // Renderizado del usuario y rol en el encabezado
+  document.getElementById("user-name")!.textContent = user.name;
+  const roleBadge = document.getElementById("user-role");
+  if (roleBadge) {
+    roleBadge.textContent = user.role || "TÉCNICO";
+  }
+
+  // CÓDIGO CORREGIDO:
+  document.getElementById("btn-logout")?.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.replace("/"); // <-- Reemplaza la entrada en el historial para no poder retroceder
+  });
+
+  // Estado de pestaña activa: 'me' (mis asignados), 'unassigned' (sin asignar), 'all' (todos)
+  let currentTab = "me";
+  const tabAssigned = document.getElementById("tab-assigned")!;
+  const tabUnassigned = document.getElementById("tab-unassigned")!;
+  const tabAll = document.getElementById("tab-all")!;
+
+  function setTab(tab: string) {
+    currentTab = tab;
+    [tabAssigned, tabUnassigned, tabAll].forEach((btn) => {
+      btn.className =
+        "px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+    });
+    if (tab === "me")
+      tabAssigned.className =
+        "px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition";
+    if (tab === "unassigned")
+      tabUnassigned.className =
+        "px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition";
+    if (tab === "all")
+      tabAll.className =
+        "px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition";
+    loadTickets();
+  }
+
+  tabAssigned.addEventListener("click", () => setTab("me"));
+  tabUnassigned.addEventListener("click", () => setTab("unassigned"));
+  tabAll.addEventListener("click", () => setTab("all"));
+
+  // Métricas del dashboard
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${API_URL}/tickets/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      document.getElementById("metric-abiertos")!.textContent =
+        data.stats.abiertos.toString();
+      document.getElementById("metric-progreso")!.textContent =
+        data.stats.enProgreso.toString();
+      document.getElementById("metric-resueltos")!.textContent =
+        data.stats.resueltosHoy.toString();
+    } catch (err) {
+      console.error("Error al cargar métricas:", err);
+    }
+  }
+
+  // Carga y renderizado de tickets con filtros
+  let onlyMyTickets = false;
+
+  async function loadTickets() {
+    const search = (
+      document.getElementById("filter-search") as HTMLInputElement
+    ).value;
+    const status = (
+      document.getElementById("filter-status") as HTMLSelectElement
+    ).value;
+    const priority = (
+      document.getElementById("filter-priority") as HTMLSelectElement
+    ).value;
+    const category = (
+      document.getElementById("filter-category") as HTMLSelectElement
+    ).value;
+
+    const params = new URLSearchParams({ search, status, priority, category });
+
+    try {
+      const res = await fetch(`${API_URL}/tickets?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      let tickets = data.tickets;
+
+      // Conteo de los tickets que están a cargo de este técnico específicamente
+      const assignedToMeCount = tickets.filter(
+        (t: any) => t.tecnico_asignado === user.name,
+      ).length;
+      document.getElementById("metric-mis-asignados")!.textContent =
+        assignedToMeCount.toString();
+
+      // Solo si el técnico hace clic en "Mis Tickets Asignados", filtramos localmente
+      if (onlyMyTickets) {
+        tickets = tickets.filter((t: any) => t.tecnico_asignado === user.name);
+      }
+
+      const tbody = document.getElementById("tickets-table-body")!;
+      tbody.innerHTML = "";
+
+      if (tickets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 italic">No se encontraron tickets en esta vista.</td></tr>`;
+        return;
+      }
+
+      tickets.forEach((t: any) => {
+        const isAssignedToMe = t.tecnico_asignado === user.name;
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-750 transition";
+
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono font-bold text-blue-400">
+            <a href="/tecnico/ticket?id=${t.id}" class="hover:underline">${t.code}</a>
+          </td>
+          <td class="p-3.5 font-medium text-white">${t.title}</td>
+          <td class="p-3.5 text-slate-300">${t.category}</td>
+          <td class="p-3.5">
+            <span class="px-2 py-0.5 rounded text-xs font-semibold ${
+              t.priority === "Crítica"
+                ? "bg-red-900/60 text-red-300"
+                : t.priority === "Alta"
+                  ? "bg-amber-900/60 text-amber-300"
+                  : "bg-slate-700 text-slate-300"
+            }">${t.priority}</span>
+          </td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-0.5 rounded text-xs font-semibold ${
+              t.status === "Abierto"
+                ? "bg-slate-700 text-slate-300"
+                : t.status === "Asignado"
+                  ? "bg-indigo-900/60 text-indigo-300"
+                  : t.status === "En progreso"
+                    ? "bg-blue-900/60 text-blue-300"
+                    : t.status === "Resuelto"
+                      ? "bg-emerald-900/60 text-emerald-300"
+                      : "bg-slate-800 text-slate-500"
+            }">${t.status}</span>
+          </td>
+          <td class="p-3.5 text-xs ${isAssignedToMe ? "text-blue-300 font-bold" : "text-slate-400"}">
+            ${t.tecnico_asignado || '<span class="italic text-slate-500">Sin asignar</span>'}
+          </td>
+          <td class="p-3.5 text-right">
+            <a href="/tecnico/ticket?id=${t.id}" class="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition">
+              Atender
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error("Error al cargar tickets:", err);
+    }
+  }
+
+  // Filtros reactivos
+  [
+    "filter-search",
+    "filter-status",
+    "filter-priority",
+    "filter-category",
+  ].forEach((id) => {
+    document.getElementById(id)!.addEventListener("input", () => loadTickets());
+  });
+
+  loadDashboard();
+  loadTickets();
+</script>

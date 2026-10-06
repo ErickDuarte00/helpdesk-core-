@@ -1,0 +1,124 @@
+---
+/**
+ * ARCHIVO: src/pages/index.astro
+ * DESCRIPCIÓN: Página de inicio y formulario de autenticación (Login).
+ * Solicita credenciales al usuario, realiza la autenticación contra la API REST,
+ * guarda el token JWT/sesión en localStorage y redirige al panel según su rol (RBAC).
+ */
+
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Iniciar Sesión">
+  <!-- Contenedor centrado para la tarjeta de autenticación -->
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div
+      class="w-full max-w-md p-8 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl"
+    >
+      <!-- Logotipo y encabezado -->
+      <div class="mb-6 text-center">
+        <h1 class="text-2xl font-bold tracking-tight text-white">
+          HELPDESK <span class="text-blue-500">IT</span>
+        </h1>
+        <p class="text-sm text-slate-400 mt-1">
+          Ingresa tus credenciales para continuar
+        </p>
+      </div>
+
+      <!-- Formulario de inicio de sesión -->
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label
+            class="block text-xs font-semibold text-slate-300 uppercase mb-1"
+            >Correo Electrónico</label
+          >
+          <input
+            type="email"
+            id="email"
+            required
+            placeholder="usuario@empresa.com"
+            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label
+            class="block text-xs font-semibold text-slate-300 uppercase mb-1"
+            >Contraseña</label
+          >
+          <input
+            type="password"
+            id="password"
+            required
+            placeholder="••••••••"
+            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-md transition duration-200"
+        >
+          Entrar al Sistema
+        </button>
+
+        <!-- Mensaje dinámico de error en caso de fallo de autenticación -->
+        <p
+          id="error-msg"
+          class="text-sm text-red-400 text-center font-medium hidden"
+        >
+        </p>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Referencias a los elementos del formulario y caja de error
+  const loginForm = document.getElementById("login-form") as HTMLFormElement;
+  const errorMsg = document.getElementById("error-msg") as HTMLParagraphElement;
+
+  // Manejador del evento de envío del formulario
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorMsg.classList.add("hidden");
+
+    // Extracción de valores ingresados
+    const email = (document.getElementById("email") as HTMLInputElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement)
+      .value;
+
+    try {
+      // Petición POST al endpoint de login
+      const res = await fetch("http://127.0.0.1:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Credenciales inválidas");
+
+      // Almacenamiento seguro del token JWT y perfil del usuario
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Enrutamiento condicional según el rol del usuario (RBAC)
+      // Redirección condicionada por rol
+      const role = String(data.user.role || "")
+        .toLowerCase()
+        .trim();
+      if (role === "empleado") {
+        window.location.href = "/empleado";
+      } else if (role === "tecnico") {
+        window.location.href = "/tecnico";
+      } else {
+        window.location.href = "/admin"; // <-- Redirigir administrador
+      }
+    } catch (err: any) {
+      // Despliegue del mensaje de error al usuario
+      errorMsg.textContent = err.message;
+      errorMsg.classList.remove("hidden");
+    }
+  });
+</script>

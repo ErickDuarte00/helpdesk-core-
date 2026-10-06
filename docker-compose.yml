@@ -1,0 +1,72 @@
+services:
+  # -------------------------------------------------------------
+  # SERVICIO 1: Base de datos PostgreSQL
+  # -------------------------------------------------------------
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: helpdesk_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password_segura_123
+      POSTGRES_DB: helpdesk_db
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persistencia de datos en disco (para no perder datos al apagar Docker)
+      - postgres_data:/var/lib/postgresql/data
+      # Script de inicialización de esquema y datos automáticos
+      - ./init-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d helpdesk_db"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    networks:
+      - helpdesk_net
+
+  # -------------------------------------------------------------
+  # SERVICIO 2: Backend (Express / Node.js)
+  # -------------------------------------------------------------
+  backend:
+    build:
+      context: ./helpdesk-core
+      dockerfile: Dockerfile
+    container_name: helpdesk_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: mi_clave_secreta_jwt_helpdesk_2026
+      # Conexión directa y rápida al PostgreSQL de Docker
+      DATABASE_URL: postgres://postgres:password_segura_123@postgres_db:5432/helpdesk_db
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    networks:
+      - helpdesk_net
+
+  # -------------------------------------------------------------
+  # SERVICIO 3: Frontend (Astro)
+  # -------------------------------------------------------------
+  frontend:
+    build:
+      context: ./helpdesk-frontend
+      dockerfile: Dockerfile
+    container_name: helpdesk_frontend
+    restart: always
+    ports:
+      - "4321:4321"
+    depends_on:
+      - backend
+    networks:
+      - helpdesk_net
+
+# Volúmenes y Redes compartidas
+volumes:
+  postgres_data:
+
+networks:
+  helpdesk_net:
+    driver: bridge

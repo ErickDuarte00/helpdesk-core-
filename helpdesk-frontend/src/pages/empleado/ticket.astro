@@ -1,0 +1,299 @@
+---
+/**
+ * ARCHIVO: src/pages/empleado/ticket.astro
+ * DESCRIPCIÓN: Vista de detalle de incidencia para usuarios con rol 'empleado'.
+ * Muestra el estado actual, información detallada, historial de comentarios
+ * y permite agregar nuevas respuestas o notas al hilo del ticket.
+ */
+
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Detalle de Incidencia">
+    <!-- Barra de navegación con botón de retorno -->
+    <header
+        class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center"
+    >
+        <div class="text-xl font-black tracking-wider text-white">
+            HELPDESK <span class="text-blue-500">IT</span>
+        </div>
+        <a
+            href="/empleado"
+            class="text-sm text-slate-300 hover:text-white transition"
+        >
+            ← Volver a Mis tickets
+        </a>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Indicador de carga inicial -->
+        <div id="loading" class="text-center text-slate-400 py-12">
+            Cargando detalles de la incidencia...
+        </div>
+
+        <div id="ticket-container" class="hidden space-y-6">
+            <!-- Ficha de Encabezado y Metadatos -->
+            <div
+                class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow"
+            >
+                <div class="flex justify-between items-start mb-2">
+                    <span
+                        id="ticket-code"
+                        class="text-sm font-mono font-bold text-blue-400"
+                        >INC-000000</span
+                    >
+                    <span
+                        id="ticket-status-badge"
+                        class="px-2.5 py-1 rounded text-xs font-semibold"
+                        >Estado</span
+                    >
+                </div>
+                <h1
+                    id="ticket-title"
+                    class="text-2xl font-bold text-white mb-4"
+                >
+                    Título del ticket
+                </h1>
+
+                <!-- Fila de metadatos (solicitante, categoría, prioridad, técnico) -->
+                <div
+                    class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t border-slate-700/60 pt-4"
+                >
+                    <div>
+                        <span class="text-slate-400 block">Solicitante</span>
+                        <span
+                            id="ticket-solicitante"
+                            class="font-medium text-white"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Categoría</span>
+                        <span
+                            id="ticket-category"
+                            class="font-medium text-white"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Prioridad</span>
+                        <span
+                            id="ticket-priority"
+                            class="font-medium text-white"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block"
+                            >Técnico asignado</span
+                        >
+                        <span id="ticket-tech" class="font-medium text-blue-300"
+                            >Sin asignar</span
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción detallada del problema -->
+            <div
+                class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow"
+            >
+                <h2
+                    class="text-sm font-bold text-slate-300 uppercase tracking-wide border-b border-slate-700/80 pb-2 mb-3"
+                >
+                    Descripción
+                </h2>
+                <p
+                    id="ticket-description"
+                    class="text-sm text-slate-200 whitespace-pre-line leading-relaxed"
+                >
+                </p>
+            </div>
+
+            <!-- Sección de Comentarios e Historial -->
+            <div
+                class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow"
+            >
+                <h2
+                    class="text-sm font-bold text-slate-300 uppercase tracking-wide border-b border-slate-700/80 pb-2 mb-4"
+                >
+                    Comentarios e Historial
+                </h2>
+
+                <!-- Lista dinámica de Comentarios -->
+                <div id="comments-list" class="space-y-3 mb-6">
+                    <!-- Los comentarios se insertan vía JavaScript -->
+                </div>
+
+                <!-- Formulario para agregar nuevo comentario -->
+                <form
+                    id="comment-form"
+                    class="space-y-3 border-t border-slate-700/80 pt-4"
+                >
+                    <label
+                        class="block text-xs font-semibold text-slate-400 uppercase"
+                        >Añadir comentario o respuesta</label
+                    >
+                    <textarea
+                        id="comment-text"
+                        rows="3"
+                        required
+                        placeholder="Escribe tu mensaje para el técnico..."
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                    ></textarea>
+                    <div class="flex justify-end">
+                        <button
+                            type="submit"
+                            class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2 rounded-lg transition"
+                        >
+                            Enviar Comentario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<script>
+    // Configuración base de la API y autenticación
+    const API_URL = "http://127.0.0.1:3000/api";
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    // Redirigir al inicio si no hay sesión activa
+    if (!token || !user.id) {
+        window.location.href = "/";
+    }
+
+    // Obtener ID del ticket desde los parámetros de la URL (?id=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticketId = urlParams.get("id");
+
+    if (!ticketId) {
+        window.location.href = "/empleado";
+    }
+
+    /**
+     * Consulta el detalle completo del ticket y sus comentarios desde el backend,
+     * actualizando los elementos del DOM y estilos de estado.
+     */
+    async function loadTicketDetail() {
+        try {
+            const res = await fetch(`${API_URL}/tickets/${ticketId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!res.ok) {
+                alert(
+                    "No se pudo cargar la información del ticket o no tienes permisos.",
+                );
+                window.location.href = "/empleado";
+                return;
+            }
+
+            const { ticket, comments } = await res.json();
+
+            // Renderizar metadatos del ticket
+            document.getElementById("ticket-code")!.textContent = ticket.code;
+            document.getElementById("ticket-title")!.textContent = ticket.title;
+            document.getElementById("ticket-solicitante")!.textContent =
+                ticket.solicitante;
+            document.getElementById("ticket-category")!.textContent =
+                ticket.category;
+            document.getElementById("ticket-priority")!.textContent =
+                ticket.priority;
+            document.getElementById("ticket-tech")!.textContent =
+                ticket.tecnico_asignado || "Sin asignar";
+            document.getElementById("ticket-description")!.textContent =
+                ticket.description;
+
+            // Renderizar badge dinámico con estilos según el estado
+            const badge = document.getElementById("ticket-status-badge")!;
+            badge.textContent = ticket.status;
+            badge.className = `px-2.5 py-1 rounded text-xs font-semibold ${
+                ticket.status === "Abierto"
+                    ? "bg-slate-700 text-slate-300"
+                    : ticket.status === "En progreso"
+                      ? "bg-blue-900/60 text-blue-300"
+                      : ticket.status === "Resuelto"
+                        ? "bg-emerald-900/60 text-emerald-300"
+                        : "bg-slate-800 text-slate-400"
+            }`;
+
+            // Renderizar lista cronológica de comentarios
+            const commentsContainer = document.getElementById("comments-list")!;
+            commentsContainer.innerHTML = "";
+
+            if (comments.length === 0) {
+                commentsContainer.innerHTML =
+                    '<p class="text-xs text-slate-500 italic">No hay comentarios aún.</p>';
+            } else {
+                comments.forEach((c: any) => {
+                    const date = new Date(c.created_at).toLocaleString();
+                    const div = document.createElement("div");
+                    div.className =
+                        "bg-slate-900/60 border border-slate-700/60 rounded-lg p-3 text-sm";
+                    div.innerHTML = `
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold ${c.autor_rol === "empleado" ? "text-slate-300" : "text-blue-400"}">
+                ${c.autor} (${c.autor_rol})
+              </span>
+              <span class="text-slate-500">${date}</span>
+            </div>
+            <p class="text-slate-200 whitespace-pre-line">${c.comment}</p>
+          `;
+                    commentsContainer.appendChild(div);
+                });
+            }
+
+            // Ocultar spinner/cargador y mostrar el contenido cargado
+            document.getElementById("loading")!.classList.add("hidden");
+            document
+                .getElementById("ticket-container")!
+                .classList.remove("hidden");
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Manejador para el envío de nuevos comentarios
+    document
+        .getElementById("comment-form")!
+        .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const commentInput = document.getElementById(
+                "comment-text",
+            ) as HTMLTextAreaElement;
+            const comment = commentInput.value.trim();
+            if (!comment) return;
+
+            try {
+                const res = await fetch(
+                    `${API_URL}/tickets/${ticketId}/comments`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ comment }),
+                    },
+                );
+
+                // CÓDIGO CORREGIDO:
+                document
+                    .getElementById("btn-logout")
+                    ?.addEventListener("click", () => {
+                        localStorage.clear();
+                        window.location.replace("/"); // <-- Reemplaza la entrada en el historial para no poder retroceder
+                    });
+
+                if (res.ok) {
+                    commentInput.value = "";
+                    loadTicketDetail(); // Recargar comentarios y detalles actualizados
+                } else {
+                    alert("No se pudo enviar el comentario.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+    // Carga inicial al ingresar a la página
+    loadTicketDetail();
+</script>

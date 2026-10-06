@@ -1,0 +1,496 @@
+---
+/**
+ * ARCHIVO: src/pages/admin/ticket.astro
+ * DESCRIPCIÓN: Detalle del ticket para el Administrador.
+ * Permite visualizar el diagnóstico del solicitante, asignar la incidencia a
+ * cualquier técnico registrado mediante un combobox alimentado desde la base de datos,
+ * actualizar el estado general, eliminar el ticket o agregar notas a la bitácora.
+ */
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Detalle de Incidencia | Admin">
+    <header
+        class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center"
+    >
+        <div class="text-xl font-black tracking-wider text-white">
+            HELPDESK <span class="text-blue-500">IT</span>
+            <span
+                class="ml-2 text-xs font-mono bg-purple-900/60 text-purple-300 px-2 py-0.5 rounded border border-purple-700/50"
+                >ADMIN</span
+            >
+        </div>
+        <a
+            href="/admin"
+            class="text-sm text-slate-300 hover:text-white transition"
+        >
+            ← Volver al Panel Admin
+        </a>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <div id="loading" class="text-center text-slate-400 py-12">
+            Cargando detalles de la incidencia...
+        </div>
+
+        <div id="ticket-container" class="hidden space-y-6">
+            <!-- Ficha Principal -->
+            <div
+                class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow"
+            >
+                <div
+                    class="flex flex-wrap justify-between items-start gap-2 mb-3"
+                >
+                    <span
+                        id="ticket-code"
+                        class="text-sm font-mono font-bold text-blue-400"
+                        >INC-000000</span
+                    >
+                    <div class="flex gap-2">
+                        <span
+                            id="badge-priority"
+                            class="px-2.5 py-0.5 rounded text-xs font-semibold"
+                            >Prioridad</span
+                        >
+                        <span
+                            id="badge-status"
+                            class="px-2.5 py-0.5 rounded text-xs font-semibold"
+                            >Estado</span
+                        >
+                    </div>
+                </div>
+
+                <h1
+                    id="ticket-title"
+                    class="text-2xl font-bold text-white mb-4"
+                >
+                    Título de la incidencia
+                </h1>
+
+                <div
+                    class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t border-slate-700/60 pt-4"
+                >
+                    <div>
+                        <span class="text-slate-400 block">Solicitante:</span>
+                        <span
+                            id="ticket-solicitante"
+                            class="font-medium text-white text-sm"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Categoría:</span>
+                        <span
+                            id="ticket-category"
+                            class="font-medium text-white text-sm"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Prioridad:</span>
+                        <span
+                            id="ticket-priority"
+                            class="font-medium text-white text-sm"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Estado:</span>
+                        <span
+                            id="ticket-status-text"
+                            class="font-medium text-white text-sm"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div
+                class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow"
+            >
+                <h2
+                    class="text-sm font-bold text-slate-300 uppercase tracking-wide border-b border-slate-700/80 pb-2 mb-3"
+                >
+                    Descripción del problema
+                </h2>
+                <p
+                    id="ticket-description"
+                    class="text-sm text-slate-200 whitespace-pre-line leading-relaxed"
+                >
+                </p>
+            </div>
+
+            <!-- Asignación de Técnico y Estado -->
+            <div
+                class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow space-y-4"
+            >
+                <h2
+                    class="text-sm font-bold text-slate-300 uppercase tracking-wide border-b border-slate-700/80 pb-2"
+                >
+                    Gestión Operativa
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Asignar a cualquier técnico registrado -->
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-slate-300 uppercase mb-1"
+                            >Técnico Asignado:</label
+                        >
+                        <div class="flex gap-2">
+                            <select
+                                id="select-tech"
+                                class="bg-slate-900 border border-slate-700 text-white text-sm rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                            >
+                                <option value="">-- Sin Asignar --</option>
+                                <!-- Opciones de técnicos inyectadas por JS -->
+                            </select>
+                            <button
+                                id="btn-save-tech"
+                                class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3 py-2 rounded-lg transition whitespace-nowrap"
+                            >
+                                Asignar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cambio de Estado -->
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-slate-300 uppercase mb-1"
+                            >Cambiar Estado:</label
+                        >
+                        <div class="flex gap-2">
+                            <select
+                                id="select-status"
+                                class="bg-slate-900 border border-slate-700 text-white text-sm rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500"
+                            >
+                                <option value="Abierto">Abierto</option>
+                                <option value="Asignado">Asignado</option>
+                                <option value="En progreso">En progreso</option>
+                                <option value="Resuelto">Resuelto</option>
+                                <option value="Cerrado">Cerrado</option>
+                            </select>
+                            <button
+                                id="btn-save-status"
+                                class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3 py-2 rounded-lg transition whitespace-nowrap"
+                            >
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2 border-t border-slate-700/60">
+                    <button
+                        id="btn-delete-this-ticket"
+                        class="text-xs px-3 py-2 bg-red-900/30 hover:bg-red-800 text-red-300 border border-red-800/60 rounded transition"
+                    >
+                        Eliminar permanentemente este ticket
+                    </button>
+                </div>
+            </div>
+
+            <!-- Comentarios -->
+            <div
+                class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow"
+            >
+                <h2
+                    class="text-sm font-bold text-slate-300 uppercase tracking-wide border-b border-slate-700/80 pb-2 mb-4"
+                >
+                    Comentarios y Bitácora
+                </h2>
+
+                <div id="comments-list" class="space-y-3 mb-6">
+                    <!-- Inyectado por JS -->
+                </div>
+
+                <form
+                    id="comment-form"
+                    class="space-y-3 border-t border-slate-700/80 pt-4"
+                >
+                    <textarea
+                        id="comment-text"
+                        rows="3"
+                        required
+                        placeholder="Añadir nota de administración..."
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                    ></textarea>
+                    <div class="flex justify-end">
+                        <button
+                            type="submit"
+                            class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2 rounded-lg transition"
+                        >
+                            Agregar Nota
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</Layout>getElementById
+
+<script>
+    const API_URL = "http://127.0.0.1:3000/api";
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (!token || !user.id) {
+        window.location.href = "/";
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticketId = urlParams.get("id");
+
+    if (!ticketId) {
+        window.location.href = "/admin";
+    }
+
+    let currentTicketCode = "";
+
+    // 1. Cargar técnicos en el select de asignación
+    async function loadTechnicians(selectedTechId: number | null) {
+        try {
+            const res = await fetch(`${API_URL}/users?role=tecnico`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            const techSelect = document.getElementById(
+                "select-tech",
+            ) as HTMLSelectElement;
+            techSelect.innerHTML =
+                '<option value="">-- Sin Asignar --</option>';
+
+            data.users.forEach((t: any) => {
+                const option = document.createElement("option");
+                option.value = t.id;
+                option.textContent = `${t.name} (${t.email})`;
+                if (selectedTechId && t.id === selectedTechId) {
+                    option.selected = true;
+                }
+                techSelect.appendChild(option);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // 2. Cargar detalle del ticket
+    async function loadTicket() {
+        try {
+            const res = await fetch(`${API_URL}/tickets/${ticketId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!res.ok) {
+                alert("Ticket no encontrado.");
+                window.location.href = "/admin";
+                return;
+            }
+
+            const { ticket, comments } = await res.json();
+            currentTicketCode = ticket.code;
+
+            document.getElementById("ticket-code")!.textContent = ticket.code;
+            document.getElementById("ticket-title")!.textContent = ticket.title;
+            document.getElementById("ticket-solicitante")!.textContent =
+                ticket.solicitante;
+            document.getElementById("ticket-category")!.textContent =
+                ticket.category;
+            document.getElementById("ticket-priority")!.textContent =
+                ticket.priority;
+            document.getElementById("ticket-status-text")!.textContent =
+                ticket.status;
+            document.getElementById("ticket-description")!.textContent =
+                ticket.description;
+
+            const pBadge = document.getElementById("badge-priority")!;
+            pBadge.textContent = ticket.priority;
+            pBadge.className = `px-2.5 py-0.5 rounded text-xs font-semibold ${
+                ticket.priority === "Crítica"
+                    ? "bg-red-900/60 text-red-300"
+                    : ticket.priority === "Alta"
+                      ? "bg-amber-900/60 text-amber-300"
+                      : "bg-slate-700 text-slate-300"
+            }`;
+
+            const sBadge = document.getElementById("badge-status")!;
+            sBadge.textContent = ticket.status;
+            sBadge.className = `px-2.5 py-0.5 rounded text-xs font-semibold ${
+                ticket.status === "Abierto"
+                    ? "bg-slate-700 text-slate-300"
+                    : ticket.status === "Asignado"
+                      ? "bg-indigo-900/60 text-indigo-300"
+                      : ticket.status === "En progreso"
+                        ? "bg-blue-900/60 text-blue-300"
+                        : ticket.status === "Resuelto"
+                          ? "bg-emerald-900/60 text-emerald-300"
+                          : "bg-slate-800 text-slate-500"
+            }`;
+
+            (
+                document.getElementById("select-status") as HTMLSelectElement
+            ).value = ticket.status;
+
+            // Cargar lista de técnicos seleccionando el actual
+            await loadTechnicians(ticket.assigned_to);
+
+            // Comentarios
+            const commentsContainer = document.getElementById("comments-list")!;
+            commentsContainer.innerHTML = "";
+            if (comments.length === 0) {
+                commentsContainer.innerHTML =
+                    '<p class="text-xs text-slate-500 italic">No hay notas registradas.</p>';
+            } else {
+                comments.forEach((c: any) => {
+                    const date = new Date(c.created_at).toLocaleString();
+                    const div = document.createElement("div");
+                    div.className =
+                        "bg-slate-900/60 border border-slate-700/60 rounded-lg p-3 text-sm";
+                    div.innerHTML = `
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-blue-400">${c.autor} (${c.autor_rol})</span>
+              <span class="text-slate-500">${date}</span>
+            </div>
+            <p class="text-slate-200 whitespace-pre-line">${c.comment}</p>
+          `;
+                    commentsContainer.appendChild(div);
+                });
+            }
+
+            document.getElementById("loading")!.classList.add("hidden");
+            document
+                .getElementById("ticket-container")!
+                .classList.remove("hidden");
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Guardar Técnico Asignado
+    document
+        .getElementById("btn-save-tech")!
+        .addEventListener("click", async () => {
+            const techVal = (
+                document.getElementById("select-tech") as HTMLSelectElement
+            ).value;
+            const assigned_to = techVal ? parseInt(techVal, 10) : null;
+
+            try {
+                const res = await fetch(
+                    `${API_URL}/tickets/${ticketId}/status`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            assigned_to,
+                            status: assigned_to ? "Asignado" : "Abierto",
+                        }),
+                    },
+                );
+
+                if (res.ok) {
+                    loadTicket();
+                } else {
+                    alert("No se pudo reasignar el técnico.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+    // Guardar Estado
+    document
+        .getElementById("btn-save-status")!
+        .addEventListener("click", async () => {
+            const newStatus = (
+                document.getElementById("select-status") as HTMLSelectElement
+            ).value;
+
+            try {
+                const res = await fetch(
+                    `${API_URL}/tickets/${ticketId}/status`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ status: newStatus }),
+                    },
+                );
+
+                if (res.ok) {
+                    loadTicket();
+                } else {
+                    alert("No se pudo actualizar el estado.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+    // Eliminar Ticket
+    document
+        .getElementById("btn-delete-this-ticket")!
+        .addEventListener("click", async () => {
+            const confirmDelete = confirm(
+                `¿Estás seguro de eliminar el ticket ${currentTicketCode}?`,
+            );
+            if (!confirmDelete) return;
+
+            try {
+                const res = await fetch(`${API_URL}/tickets/${ticketId}`, {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                if (res.ok) {
+                    alert("Ticket eliminado.");
+                    window.location.href = "/admin";
+                } else {
+                    alert("No se pudo eliminar el ticket.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+    // Comentar
+    document
+        .getElementById("comment-form")!
+        .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const commentInput = document.getElementById(
+                "comment-text",
+            ) as HTMLTextAreaElement;
+            const comment = commentInput.value.trim();
+            if (!comment) return;
+
+            try {
+                const res = await fetch(
+                    `${API_URL}/tickets/${ticketId}/comments`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ comment }),
+                    },
+                );
+
+                if (res.ok) {
+                    commentInput.value = "";
+                    loadTicket();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+    document.getElementById("btn-logout")?.addEventListener("click", () => {
+        localStorage.clear();
+        window.location.replace("/"); // <-- Reemplaza la entrada en el historial para no poder retroceder
+    });
+
+    loadTicket();
+</script>

@@ -1,0 +1,56 @@
+---
+/**
+ * ARCHIVO: src/layouts/layout.astro
+ * DESCRIPCIÓN: Plantilla base principal (Layout) para las páginas de la aplicación.
+ * Provee la estructura HTML básica, metadatos, fuentes/estilos globales
+ * y el contenedor principal (<slot />) donde se renderiza cada vista.
+ */
+
+// Importación de los estilos globales y Tailwind CSS
+import "../styles/global.css";
+
+// Definición de las propiedades esperadas por el layout
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <!-- Metadatos de codificación y diseño responsive -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | Helpdesk IT</title>
+  </head>
+  <body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
+    <!-- Punto de inyección del contenido dinámico de cada página -->
+    <slot />
+  </body>
+</html>
+
+<!-- VIGILANTE DE SESIÓN GLOBAL (ANTI-BOTÓN ATRÁS) -->
+<script>
+  function verifyActiveSession() {
+    // Si no estamos en la página de login ('/')
+    if (window.location.pathname !== "/") {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+
+      // Si se cerró sesión, expulsar inmediatamente sin guardar historial
+      if (!token || !user) {
+        window.location.replace("/");
+      }
+    }
+  }
+
+  // 1. Verificación en carga normal
+  verifyActiveSession();
+
+  // 2. Verificación forzada cuando el navegador restaura la página desde la memoria RAM (Botón Atrás)
+  window.addEventListener("pageshow", (event) => {
+    verifyActiveSession();
+  });
+</script>
