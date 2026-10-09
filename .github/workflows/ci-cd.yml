@@ -104,6 +104,8 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO_LOWER }}-backend:latest
             ghcr.io/${{ env.REPO_LOWER }}-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # ---------------------------------------------------------------------
       # 2. Construir y Publicar Imagen del Frontend
@@ -117,3 +119,5 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO_LOWER }}-frontend:latest
             ghcr.io/${{ env.REPO_LOWER }}-frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
