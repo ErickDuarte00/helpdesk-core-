@@ -20,7 +20,6 @@ env:
 jobs:
   
   # ETAPA 1: INTEGRACIÓN CONTINUA (Compilación y Pruebas)
- 
   test-and-build:
     name: Validar y Compilar Código
     runs-on: ubuntu-latest
@@ -61,9 +60,7 @@ jobs:
         working-directory: ./helpdesk-frontend
         run: npm run build
 
- 
   # ETAPA 2: ENTREGA CONTINUA (Docker Build & Push a GHCR)
-
   docker-publish:
     name: Construir y Publicar Imágenes Docker
     needs: test-and-build # Solo se ejecuta si la etapa anterior pasó con éxito
@@ -122,9 +119,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-deploy:
-    needs: build # IMPORTANTE: pon aquí el nombre exacto del job previo de compilación
+  # ETAPA 3: DESPLIEGUE CONTINUO (Deploy por SSH a AWS EC2)
+  deploy:
+    name: Desplegar en AWS EC2
+    needs: docker-publish
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy to AWS EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
