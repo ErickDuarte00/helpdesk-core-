@@ -89,8 +89,10 @@ import Layout from "../layouts/Layout.astro";
       .value;
 
     try {
+      const API_URL = import.meta.env.PUBLIC_API_URL || "http://127.0.0.1:3000/api";
+
       // Petición POST al endpoint de login
-      const res = await fetch("http://127.0.0.1:3000/api/auth/login", {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

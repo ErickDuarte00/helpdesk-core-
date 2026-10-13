@@ -116,6 +116,8 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO_LOWER }}-frontend:latest
             ghcr.io/${{ env.REPO_LOWER }}-frontend:${{ github.sha }}
+          build-args: |
+            PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL || vars.PUBLIC_API_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
