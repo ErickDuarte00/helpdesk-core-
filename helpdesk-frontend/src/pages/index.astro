@@ -76,49 +76,66 @@ import Layout from "../layouts/Layout.astro";
 <script>
   // Referencias a los elementos del formulario y caja de error
   const loginForm = document.getElementById("login-form") as HTMLFormElement;
+  const emailInput = document.getElementById("email") as HTMLInputElement;
+  const passwordInput = document.getElementById("password") as HTMLInputElement;
   const errorMsg = document.getElementById("error-msg") as HTMLParagraphElement;
+
+  const API_URL =
+    import.meta.env.PUBLIC_API_URL || "http://18.225.192.108:3000/api";
+
+  const clearLoginForm = () => {
+    loginForm.reset();
+  };
 
   // Manejador del evento de envío del formulario
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorMsg.classList.add("hidden");
 
-    // Extracción de valores ingresados
-    const email = (document.getElementById("email") as HTMLInputElement).value;
-    const password = (document.getElementById("password") as HTMLInputElement)
-      .value;
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
     try {
-      const API_URL = import.meta.env.PUBLIC_API_URL || "http://127.0.0.1:3000/api";
-
-      // Petición POST al endpoint de login
+      // 1. Petición a /api/auth/login usando API_URL
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Credenciales inválidas");
+      // 2. Manejo seguro: Si la respuesta no es OK, evitar romper el JSON parser
+      if (!res.ok) {
+        let errorDescription = `Error del servidor (${res.status})`;
+        try {
+          const errData = await res.json();
+          errorDescription = errData.error || errorDescription;
+        } catch {
+          // Si el servidor devolvió HTML (como un 404 o 502), no crashea
+        }
+        throw new Error(errorDescription);
+      }
 
-      // Almacenamiento seguro del token JWT y perfil del usuario
+      const data = await res.json();
+
+      clearLoginForm();
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Enrutamiento condicional según el rol del usuario (RBAC)
-      // Redirección condicionada por rol
       const role = String(data.user.role || "")
         .toLowerCase()
         .trim();
+
       if (role === "empleado") {
-        window.location.href = "/empleado";
-      } else if (role === "tecnico") {
-        window.location.href = "/tecnico";
+        window.location.replace("/empleado");
+      } else if (role === "tecnico" || role === "técnico") {
+        window.location.replace("/tecnico");
+      } else if (role === "admin" || role === "administrador") {
+        window.location.replace("/admin");
       } else {
-        window.location.href = "/admin"; // <-- Redirigir administrador
+        window.location.replace("/dashboard");
       }
     } catch (err: any) {
-      // Despliegue del mensaje de error al usuario
       errorMsg.textContent = err.message;
       errorMsg.classList.remove("hidden");
     }
