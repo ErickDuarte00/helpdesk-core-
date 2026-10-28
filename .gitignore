@@ -1,3 +1,9 @@
-node_modules/
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.pem
+
+# Entorno y variables
 .env
-*.log
