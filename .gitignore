@@ -1,3 +1,19 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Builds
+dist/
+.astro/
+
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Builds
+dist/
+.astro/
+
 # Terraform
 **/.terraform/*
 *.tfstate
@@ -7,3 +23,7 @@
 
 # Entorno y variables
 .env
+.env.*
+!.env.example
+.env.*
+!.env.example

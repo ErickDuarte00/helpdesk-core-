@@ -1,0 +1,65 @@
+Paso 1: Rotar la contraseña de Supabase
+1.1. Generar la nueva contraseña:Panel de Supabase.
+1. Abre tu navegador y ve a tu proyecto en Supabase.
+2. En el menú lateral izquierdo, haz clic en Project Settings (el icono de engranaje) y selecciona Database.
+3. Desplázate hacia abajo hasta la sección de credenciales de la base de datos y haz clic en el botón Reset database password.
+4. Ingresa una nueva contraseña segura (o usa el generador automático), cópiala en un lugar seguro y confirma el cambio con el botón Reset Password.
+2.2. Actualizar el archivo .env en el servidor:EC2 Terminal.
+1. Entra a tu consola de EC2 Instance Connect.
+2. Abre tu archivo .env:
+cd ~/helpdesk
+nano .env
+3. En la línea DATABASE_URL, reemplaza la contraseña anterior por la nueva que acabas de generar:
+DATABASE_URL=postgresql://postgres.bxvaimngwpkxfyoubchb:TU_NUEVA_PASSWORD@aws-0-ca-central-1.pooler.supabase.com:5432/postgres
+4. Guarda los cambios presionando Ctrl + O, pulsa Enter y sal con Ctrl + X.
+3.3. Reiniciar contenedores y verificar:EC2 Terminal.
+Aplica la nueva clave reiniciando el backend:
+docker compose down
+docker compose up -d
+docker logs helpdesk_backend --tail 15
+Verificación: Confirma que el backend indique conexión exitosa y no arroje errores de autenticación (password authentication failed).
+4.4. Actualizar el secreto en GitHub Actions:GitHub.
+1. Ve a tu repositorio en GitHub > Settings > Secrets and variables > Actions.
+2. Busca el secreto DATABASE_URL, edítalo con la nueva cadena de conexión y haz clic en Update secret.
+
+Paso 2: Configurar la Memoria Swap de 2 GB en Ubuntu
+La instancia t3.micro cuenta únicamente con 1 GB de memoria RAM física. Al compilar o ejecutar procesos con Node.js y Docker, la memoria se llena rápidamente; la memoria Swap destina 2 GB de tu disco duro para evitar que el sistema operativo congele o apague los contenedores. 
+En tu terminal de EC2 Instance Connect, copia y ejecuta estos comandos uno por uno:
+1. Crear el archivo de intercambio de 2 GB:
+sudo fallocate -l 2G /swapfile
+2. Asegurar los permisos para que solo el sistema acceda a él:
+sudo chmod 600 /swapfile
+3. Formatear el archivo como espacio Swap:
+sudo mkswap /swapfile
+4. Activar la memoria Swap de inmediato:
+sudo swapon /swapfile
+5. Hacer que la Swap se active automáticamente al reiniciar la máquina:
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+6. Verificar que la Swap esté funcionando:
+free -h
+Verificación: En la fila que dice Swap:, deberás ver Total: 2.0Gi y en Mem: tu RAM física usual de ~950Mi.
+Paso 3: Asegurar la política de reinicio en docker-compose.yml
+1. Abre el archivo de composición:
+nano ~/helpdesk/docker-compose.yml
+2. Asegúrate de que tanto el servicio frontend como backend incluyan la directiva restart: unless-stopped:
+services:
+  frontend:
+    image: ghcr.io/erickduarte00/helpdesk-core--frontend:latest
+    restart: unless-stopped
+    ports:
+      - "80:4321"
+    # ...
+  backend:
+    image: ghcr.io/erickduarte00/helpdesk-core--backend:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    # ...
+3. Guarda con Ctrl + O, presiona Enter y sal con Ctrl + X.
+Paso 4: Limpiar imágenes antiguas de Docker
+Para liberar espacio en el disco de tu máquina tras las múltiples descargas previas, ejecuta:
+docker image prune -f
+Esto borrará las capas e imágenes intermedias huérfanas que quedaron en desuso.
+Una vez ejecutados estos comandos, ¿qué valores te muestra el comando free -h en la terminal?
+
+
