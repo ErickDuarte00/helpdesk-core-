@@ -1,0 +1,894 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2026-11-03T19:32:07Z"
+    generateName: helpdesk-backend-85f458cb7b-
+    generation: 1
+    labels:
+      app: helpdesk-backend
+      pod-template-hash: 85f458cb7b
+    name: helpdesk-backend-85f458cb7b-m4tm2
+    namespace: helpdesk
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: helpdesk-backend-85f458cb7b
+      uid: 3f14c017-ef3e-4e39-bf1e-e0e5cde4f5f5
+    resourceVersion: "12139"
+    uid: 5adbc97c-b9c1-4249-9e5c-2b4d44b7c9f4
+  spec:
+    containers:
+    - envFrom:
+      - secretRef:
+          name: helpdesk-secrets
+      image: ghcr.io/erickduarte00/helpdesk-core--backend:latest
+      imagePullPolicy: Always
+      name: backend
+      ports:
+      - containerPort: 3000
+        protocol: TCP
+      resources:
+        limits:
+          cpu: 300m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-vmjk7
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: ip-172-31-22-239
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-vmjk7
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    allocatedResources:
+      cpu: 100m
+      memory: 128Mi
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:32:08Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:32:07Z"
+      observedGeneration: 1
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:32:09Z"
+      observedGeneration: 1
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:32:09Z"
+      observedGeneration: 1
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:32:07Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - allocatedResources:
+        cpu: 100m
+        memory: 128Mi
+      containerID: containerd://35db3a2e2c6f9472cde76f85b368aba41bb19c1cd741645dec76b917b883c1d0
+      image: ghcr.io/erickduarte00/helpdesk-core--backend:latest
+      imageID: ghcr.io/erickduarte00/helpdesk-core--backend@sha256:2abe37c1e7b195e9a37f705370b92b664fbb4afc3bc1942ead8cb2610c54ca13
+      lastState: {}
+      name: backend
+      ready: true
+      resources:
+        limits:
+          cpu: 300m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2026-11-03T19:32:09Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 6
+          - 10
+          - 11
+          - 20
+          - 26
+          - 27
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-vmjk7
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 172.31.22.239
+    hostIPs:
+    - ip: 172.31.22.239
+    observedGeneration: 1
+    phase: Running
+    podIP: 10.42.0.50
+    podIPs:
+    - ip: 10.42.0.50
+    qosClass: Burstable
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 79m
+        memory: 128Mi
+    startTime: "2026-11-03T19:32:07Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2026-11-03T19:46:22Z"
+    generateName: helpdesk-frontend-6667978599-
+    generation: 1
+    labels:
+      app: helpdesk-frontend
+      pod-template-hash: "6667978599"
+    name: helpdesk-frontend-6667978599-75mks
+    namespace: helpdesk
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: helpdesk-frontend-6667978599
+      uid: 41d90306-a680-4891-875c-1bc69cf27a7f
+    resourceVersion: "12551"
+    uid: 3c95ed88-dc04-4d4d-a467-3c028bb26030
+  spec:
+    containers:
+    - envFrom:
+      - secretRef:
+          name: helpdesk-secrets
+      image: ghcr.io/erickduarte00/helpdesk-core--frontend:latest
+      imagePullPolicy: Always
+      name: frontend
+      ports:
+      - containerPort: 4321
+        protocol: TCP
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-6gkg8
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: ip-172-31-22-239
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-6gkg8
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    allocatedResources:
+      cpu: 100m
+      memory: 256Mi
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:46:23Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:46:22Z"
+      observedGeneration: 1
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:46:23Z"
+      observedGeneration: 1
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:46:23Z"
+      observedGeneration: 1
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2026-11-03T19:46:22Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - allocatedResources:
+        cpu: 100m
+        memory: 256Mi
+      containerID: containerd://dae16911078c2ff0685ac9f4cd4dad373d202ef07db8f3007b74868b46bbdd81
+      image: ghcr.io/erickduarte00/helpdesk-core--frontend:latest
+      imageID: ghcr.io/erickduarte00/helpdesk-core--frontend@sha256:5259a80d1227fded1589edb140e3f15d5d480789c3cce4849b55ba6cf7011f68
+      lastState: {}
+      name: frontend
+      ready: true
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2026-11-03T19:46:23Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 6
+          - 10
+          - 11
+          - 20
+          - 26
+          - 27
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-6gkg8
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 172.31.22.239
+    hostIPs:
+    - ip: 172.31.22.239
+    observedGeneration: 1
+    phase: Running
+    podIP: 10.42.0.53
+    podIPs:
+    - ip: 10.42.0.53
+    qosClass: Burstable
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 79m
+        memory: 256Mi
+    startTime: "2026-11-03T19:46:22Z"
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"helpdesk-backend-service","namespace":"helpdesk"},"spec":{"ports":[{"nodePort":30000,"port":3000,"targetPort":3000}],"selector":{"app":"helpdesk-backend"},"type":"LoadBalancer"}}
+    creationTimestamp: "2026-10-28T23:18:25Z"
+    finalizers:
+    - service.kubernetes.io/load-balancer-cleanup
+    name: helpdesk-backend-service
+    namespace: helpdesk
+    resourceVersion: "13640"
+    uid: b2a3f480-eb95-4ff1-b8c1-046b6f3549f3
+  spec:
+    allocateLoadBalancerNodePorts: true
+    clusterIP: 10.43.176.33
+    clusterIPs:
+    - 10.43.176.33
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - nodePort: 30000
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      app: helpdesk-backend
+    sessionAffinity: None
+    type: LoadBalancer
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 172.31.22.239
+        ipMode: VIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"helpdesk-frontend-service","namespace":"helpdesk"},"spec":{"ports":[{"nodePort":30080,"port":80,"targetPort":4321}],"selector":{"app":"helpdesk-frontend"},"type":"LoadBalancer"}}
+    creationTimestamp: "2026-10-28T23:18:25Z"
+    finalizers:
+    - service.kubernetes.io/load-balancer-cleanup
+    name: helpdesk-frontend-service
+    namespace: helpdesk
+    resourceVersion: "13101"
+    uid: 67b1788c-a941-450e-a3f0-cf50126f7ce6
+  spec:
+    allocateLoadBalancerNodePorts: true
+    clusterIP: 10.43.12.172
+    clusterIPs:
+    - 10.43.12.172
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - nodePort: 30080
+      port: 80
+      protocol: TCP
+      targetPort: 4321
+    selector:
+      app: helpdesk-frontend
+    sessionAffinity: None
+    type: LoadBalancer
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 172.31.22.239
+        ipMode: VIP
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "2"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"helpdesk-backend","namespace":"helpdesk"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"helpdesk-backend"}},"template":{"metadata":{"labels":{"app":"helpdesk-backend"}},"spec":{"containers":[{"envFrom":[{"secretRef":{"name":"helpdesk-secrets"}}],"image":"ghcr.io/erickduarte00/helpdesk-core--backend:latest","imagePullPolicy":"Always","name":"backend","ports":[{"containerPort":3000}],"resources":{"limits":{"cpu":"300m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}]}}}}
+    creationTimestamp: "2026-10-28T23:12:30Z"
+    generation: 2
+    name: helpdesk-backend
+    namespace: helpdesk
+    resourceVersion: "12113"
+    uid: d86adcb7-563e-4f1e-a278-7146b9c06725
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: helpdesk-backend
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          app: helpdesk-backend
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: helpdesk-secrets
+          image: ghcr.io/erickduarte00/helpdesk-core--backend:latest
+          imagePullPolicy: Always
+          name: backend
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 300m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-11-03T18:56:16Z"
+      lastUpdateTime: "2026-11-03T18:56:16Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2026-10-28T23:12:30Z"
+      lastUpdateTime: "2026-11-03T19:32:09Z"
+      message: ReplicaSet "helpdesk-backend-85f458cb7b" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 2
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "3"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"helpdesk-frontend","namespace":"helpdesk"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"helpdesk-frontend"}},"template":{"metadata":{"labels":{"app":"helpdesk-frontend"}},"spec":{"containers":[{"envFrom":[{"secretRef":{"name":"helpdesk-secrets"}}],"image":"ghcr.io/erickduarte00/helpdesk-core--frontend:latest","imagePullPolicy":"Always","name":"frontend","ports":[{"containerPort":4321}],"resources":{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}}]}}}}
+    creationTimestamp: "2026-10-28T23:15:55Z"
+    generation: 8
+    name: helpdesk-frontend
+    namespace: helpdesk
+    resourceVersion: "13100"
+    uid: b5e29f10-c81d-45cb-becc-1e971c3e58c2
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: helpdesk-frontend
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          app: helpdesk-frontend
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: helpdesk-secrets
+          image: ghcr.io/erickduarte00/helpdesk-core--frontend:latest
+          imagePullPolicy: Always
+          name: frontend
+          ports:
+          - containerPort: 4321
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-11-03T01:30:32Z"
+      lastUpdateTime: "2026-11-03T01:30:33Z"
+      message: ReplicaSet "helpdesk-frontend-5bd8c5fd97" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    - lastTransitionTime: "2026-11-03T19:46:23Z"
+      lastUpdateTime: "2026-11-03T19:46:23Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 8
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "2"
+    creationTimestamp: "2026-11-03T19:32:07Z"
+    generation: 1
+    labels:
+      app: helpdesk-backend
+      pod-template-hash: 85f458cb7b
+    name: helpdesk-backend-85f458cb7b
+    namespace: helpdesk
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: helpdesk-backend
+      uid: d86adcb7-563e-4f1e-a278-7146b9c06725
+    resourceVersion: "12048"
+    uid: 3f14c017-ef3e-4e39-bf1e-e0e5cde4f5f5
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: helpdesk-backend
+        pod-template-hash: 85f458cb7b
+    template:
+      metadata:
+        labels:
+          app: helpdesk-backend
+          pod-template-hash: 85f458cb7b
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: helpdesk-secrets
+          image: ghcr.io/erickduarte00/helpdesk-core--backend:latest
+          imagePullPolicy: Always
+          name: backend
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 300m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    fullyLabeledReplicas: 1
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: "2026-10-28T23:12:30Z"
+    generation: 2
+    labels:
+      app: helpdesk-backend
+      pod-template-hash: 88ddb7cd6
+    name: helpdesk-backend-88ddb7cd6
+    namespace: helpdesk
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: helpdesk-backend
+      uid: d86adcb7-563e-4f1e-a278-7146b9c06725
+    resourceVersion: "12112"
+    uid: 9081e379-ff74-456f-8415-9e9d7530dbc8
+  spec:
+    replicas: 0
+    selector:
+      matchLabels:
+        app: helpdesk-backend
+        pod-template-hash: 88ddb7cd6
+    template:
+      metadata:
+        labels:
+          app: helpdesk-backend
+          pod-template-hash: 88ddb7cd6
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: helpdesk-secrets
+          image: ghcr.io/erickduarte00/helpdesk-core--backend:latest
+          imagePullPolicy: Always
+          name: backend
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 300m
+              memory: 300Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    observedGeneration: 2
+    replicas: 0
+    terminatingReplicas: 0
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "0"
+      deployment.kubernetes.io/max-replicas: "0"
+      deployment.kubernetes.io/revision: "2"
+    creationTimestamp: "2026-11-02T23:41:40Z"
+    generation: 4
+    labels:
+      app: helpdesk-frontend
+      pod-template-hash: 5bd8c5fd97
+    name: helpdesk-frontend-5bd8c5fd97
+    namespace: helpdesk
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: helpdesk-frontend
+      uid: b5e29f10-c81d-45cb-becc-1e971c3e58c2
+    resourceVersion: "12095"
+    uid: f3457ea6-e7c5-4d49-b731-f2c466ef74ca
+  spec:
+    replicas: 0
+    selector:
+      matchLabels:
+        app: helpdesk-frontend
+        pod-template-hash: 5bd8c5fd97
+    template:
+      metadata:
+        labels:
+          app: helpdesk-frontend
+          pod-template-hash: 5bd8c5fd97
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: helpdesk-secrets
+          image: ghcr.io/erickduarte00/helpdesk-core--frontend:latest
+          imagePullPolicy: Always
+          name: frontend
+          ports:
+          - containerPort: 4321
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    observedGeneration: 4
+    replicas: 0
+    terminatingReplicas: 0
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "3"
+    creationTimestamp: "2026-11-03T19:32:16Z"
+    generation: 2
+    labels:
+      app: helpdesk-frontend
+      pod-template-hash: "6667978599"
+    name: helpdesk-frontend-6667978599
+    namespace: helpdesk
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: helpdesk-frontend
+      uid: b5e29f10-c81d-45cb-becc-1e971c3e58c2
+    resourceVersion: "12511"
+    uid: 41d90306-a680-4891-875c-1bc69cf27a7f
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: helpdesk-frontend
+        pod-template-hash: "6667978599"
+    template:
+      metadata:
+        labels:
+          app: helpdesk-frontend
+          pod-template-hash: "6667978599"
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: helpdesk-secrets
+          image: ghcr.io/erickduarte00/helpdesk-core--frontend:latest
+          imagePullPolicy: Always
+          name: frontend
+          ports:
+          - containerPort: 4321
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    fullyLabeledReplicas: 1
+    observedGeneration: 2
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "0"
+      deployment.kubernetes.io/max-replicas: "0"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: "2026-10-28T23:15:55Z"
+    generation: 2
+    labels:
+      app: helpdesk-frontend
+      pod-template-hash: 66f76768d5
+    name: helpdesk-frontend-66f76768d5
+    namespace: helpdesk
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: helpdesk-frontend
+      uid: b5e29f10-c81d-45cb-becc-1e971c3e58c2
+    resourceVersion: "5380"
+    uid: faed004c-1c8d-4a6e-a7ba-af80ae602550
+  spec:
+    replicas: 0
+    selector:
+      matchLabels:
+        app: helpdesk-frontend
+        pod-template-hash: 66f76768d5
+    template:
+      metadata:
+        labels:
+          app: helpdesk-frontend
+          pod-template-hash: 66f76768d5
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: helpdesk-secrets
+          image: ghcr.io/erickduarte00/helpdesk-core--frontend:latest
+          imagePullPolicy: Always
+          name: frontend
+          ports:
+          - containerPort: 4321
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 256m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    observedGeneration: 2
+    replicas: 0
+    terminatingReplicas: 0
+kind: List
+metadata:
+  resourceVersion: ""

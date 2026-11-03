@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helpdesk-backend
+  namespace: helpdesk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helpdesk-backend
+  template:
+    metadata:
+      labels:
+        app: helpdesk-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/erickduarte00/helpdesk-core--backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: helpdesk-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helpdesk-backend-service
+  namespace: helpdesk
+spec:
+  type: LoadBalancer
+  selector:
+    app: helpdesk-backend
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30000

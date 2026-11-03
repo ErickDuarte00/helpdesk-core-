@@ -27,3 +27,8 @@ dist/
 !.env.example
 .env.*
 !.env.example
+node_modules/
+dist/
+.astro/
+.env
+*.log
