@@ -62,12 +62,42 @@ import Layout from "../layouts/Layout.astro";
           Entrar al Sistema
         </button>
 
-        <!-- Mensaje dinámico de error en caso de fallo de autenticación -->
+        <!-- Mensaje dinámico de error o estado -->
         <p
           id="error-msg"
           class="text-sm text-red-400 text-center font-medium hidden"
         >
         </p>
+
+        <!-- Acceso Rápido Demo -->
+        <div class="pt-4 border-t border-slate-700 text-center">
+          <p class="text-xs text-slate-400 uppercase font-semibold tracking-wider mb-2">
+            Acceso Rápido (Demo)
+          </p>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              id="btn-demo-admin"
+              class="px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs font-medium text-purple-300 rounded border border-purple-500/30 transition"
+            >
+              Admin
+            </button>
+            <button
+              type="button"
+              id="btn-demo-tecnico"
+              class="px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs font-medium text-blue-300 rounded border border-blue-500/30 transition"
+            >
+              Técnico
+            </button>
+            <button
+              type="button"
+              id="btn-demo-empleado"
+              class="px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs font-medium text-emerald-300 rounded border border-emerald-500/30 transition"
+            >
+              Empleado
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   </div>
@@ -87,23 +117,16 @@ import Layout from "../layouts/Layout.astro";
     loginForm.reset();
   };
 
-  // Manejador del evento de envío del formulario
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const executeLogin = async (email: string, password: string) => {
     errorMsg.classList.add("hidden");
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
     try {
-      // 1. Petición a /api/auth/login usando API_URL
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      // 2. Manejo seguro: Si la respuesta no es OK, evitar romper el JSON parser
       if (!res.ok) {
         let errorDescription = `Error del servidor (${res.status})`;
         try {
@@ -116,7 +139,6 @@ import Layout from "../layouts/Layout.astro";
       }
 
       const data = await res.json();
-
       clearLoginForm();
 
       localStorage.setItem("token", data.token);
@@ -139,5 +161,41 @@ import Layout from "../layouts/Layout.astro";
       errorMsg.textContent = err.message;
       errorMsg.classList.remove("hidden");
     }
+  };
+
+  // Manejador del evento de envío manual del formulario
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await executeLogin(emailInput.value.trim(), passwordInput.value);
   });
+
+  // Credenciales predefinidas de demostración
+  const DEMO_CREDENTIALS = {
+    admin: { email: "admin@test.com", pass: "admin" },
+    tecnico: { email: "erick@test.com", pass: "Password123!" },
+    empleado: { email: "empleado@test.com", pass: "Contrasenia1" }
+  };
+
+  // Event listeners para los botones de acceso rápido
+  document.getElementById("btn-demo-admin")?.addEventListener("click", () => {
+    executeLogin(DEMO_CREDENTIALS.admin.email, DEMO_CREDENTIALS.admin.pass);
+  });
+  document.getElementById("btn-demo-tecnico")?.addEventListener("click", () => {
+    executeLogin(DEMO_CREDENTIALS.tecnico.email, DEMO_CREDENTIALS.tecnico.pass);
+  });
+  document.getElementById("btn-demo-empleado")?.addEventListener("click", () => {
+    executeLogin(DEMO_CREDENTIALS.empleado.email, DEMO_CREDENTIALS.empleado.pass);
+  });
+
+  // AUTO-LOGIN por parámetro de URL (?demo=admin, ?demo=tecnico, ?demo=empleado)
+  const urlParams = new URLSearchParams(window.location.search);
+  const demoRole = urlParams.get("demo")?.toLowerCase().trim();
+
+  if (demoRole && DEMO_CREDENTIALS[demoRole]) {
+    errorMsg.textContent = `Iniciando sesión demo como ${demoRole}...`;
+    errorMsg.classList.remove("hidden");
+    errorMsg.classList.remove("text-red-400");
+    errorMsg.classList.add("text-blue-400");
+    executeLogin(DEMO_CREDENTIALS[demoRole].email, DEMO_CREDENTIALS[demoRole].pass);
+  }
 </script>
